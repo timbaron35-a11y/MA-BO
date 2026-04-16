@@ -239,7 +239,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
     <div class="intro-phrase" id="intro-phrase"></div>
     <div class="intro-form" id="intro-form">
       <input class="intro-input" id="film-title" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
-      <button class="intro-btn" onclick="startApp()">Commencer →</button>
+      <button class="intro-btn" onclick="startApp()" id="intro-start-btn">▶ Commencer</button>
       <div class="intro-skip" onclick="startApp()">passer</div>
     </div>
   </div>
@@ -978,8 +978,23 @@ function itunesSearch(q){
 
 function togPlay(){
   var sel=sels[curS];if(!sel||!sel.preview)return;
-  if(aud.src!==sel.preview)aud.src=sel.preview;
-  if(aud.paused){aud.play();playIdx=curS;anim();}else aud.pause();
+  if(!introAud.paused){introAud.pause();}
+  if(aud.src!==sel.preview){
+    aud.pause();
+    aud.src=sel.preview;
+    aud.load();
+  }
+  if(aud.paused){
+    var p=aud.play();
+    if(p!==undefined){
+      p.then(function(){playIdx=curS;anim();var b=document.getElementById('mpb');if(b)b.textContent='⏸';})
+      .catch(function(){});
+    } else {
+      playIdx=curS;anim();
+    }
+  } else {
+    aud.pause();
+  }
   var b=document.getElementById('mpb');if(b)b.textContent=aud.paused?'▶':'⏸';
 }
 function anim(){
@@ -1000,11 +1015,25 @@ aud.addEventListener('pause',function(){var b=document.getElementById('mpb');if(
 
 function prev30(name,artist,btn,previewUrl){
   if(!previewUrl){toast('Pas de preview.');return;}
-  btn.textContent='…';
+  // Stopper l'intro audio si en cours
+  if(!introAud.paused){introAud.pause();}
+  // Toggle si même src
   if(aud.src===previewUrl&&!aud.paused){aud.pause();btn.textContent='▶';return;}
-  aud.src=previewUrl;aud.play();btn.textContent='⏸';
+  // Reset tous les boutons preview
+  document.querySelectorAll('.dz-prev').forEach(function(b){b.textContent='▶';});
+  btn.textContent='…';
+  aud.pause();
+  aud.src=previewUrl;
+  aud.load();
+  var playPromise=aud.play();
+  if(playPromise!==undefined){
+    playPromise.then(function(){btn.textContent='⏸';})
+    .catch(function(){btn.textContent='▶';toast('Lecture impossible');});
+  } else {
+    btn.textContent='⏸';
+  }
   aud.onended=function(){btn.textContent='▶';};
-  aud.onpause=function(){btn.textContent='▶';};
+  aud.onpause=function(){if(btn)btn.textContent='▶';};
 }
 function selTr(name,artist,cover,preview){
   sels[curS]={name:name,artist:artist,cover:cover,preview:preview};
@@ -1282,6 +1311,7 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 // ─── INTRO ───────────────────────────────────────────────────────────────────
 var FILM_TITLE = '';
 var introAud = new Audio();
+introAud.preload = 'auto';
 
 (function(){
   // Preview Bekar - Le film de ma vie via notre fonction Netlify
@@ -1312,37 +1342,6 @@ var _introStarted = false;
   var form = document.getElementById('intro-form');
   if(!phrase) return;
 
-  // Démarrer la musique au premier contact (contourne l'autoplay mobile)
-  var _musicStarted = false;
-  function tryStartMusic(){
-    if(_musicStarted) return;
-    _musicStarted = true;
-    introAud.volume = 0;
-    introAud.play().catch(function(){});
-    var vol = 0;
-    var fi = setInterval(function(){
-      vol = Math.min(vol + 0.03, 0.32);
-      introAud.volume = vol;
-      if(vol >= 0.32) clearInterval(fi);
-    }, 100);
-  }
-  document.addEventListener('touchstart', tryStartMusic, {once:true});
-  document.addEventListener('click', tryStartMusic, {once:true});
-  // Sur desktop, tenter direct après 500ms (souvent autorisé)
-  setTimeout(function(){
-    if(!_musicStarted){
-      _musicStarted = true;
-      introAud.volume = 0;
-      introAud.play().catch(function(){});
-      var vol = 0;
-      var fi = setInterval(function(){
-        vol = Math.min(vol + 0.03, 0.32);
-        introAud.volume = vol;
-        if(vol >= 0.32) clearInterval(fi);
-      }, 100);
-    }
-  }, 500);
-
   var i = 0;
   function showNext(){
     if(i >= INTRO_PHRASES.length){
@@ -1367,21 +1366,35 @@ function startApp(){
   FILM_TITLE = document.getElementById('film-title').value.trim() || 'Le film de ma vie';
   var intro=document.getElementById('intro');
 
-  // Fade out musique puis disparition
-  intro.classList.add('out');
-  var fadeOut=setInterval(function(){
-    introAud.volume=Math.max(introAud.volume-0.03,0);
-    if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
-  },60);
+  // Lancer la musique si pas encore démarrée
+  if(introAud.paused && introAud.src){
+    introAud.volume=0;
+    introAud.play().catch(function(){});
+    var vol=0;
+    var fi=setInterval(function(){
+      vol=Math.min(vol+0.04,0.32);
+      introAud.volume=vol;
+      if(vol>=0.32) clearInterval(fi);
+    },80);
+  }
+
+  // Attendre 4 secondes puis fade out
   setTimeout(function(){
-    intro.style.display='none';
-    if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
-      setTimeout(function(){
-        document.getElementById('tuto-safari').classList.add('open');
-        localStorage.setItem('tuto-seen','1');
-      }, 1000);
-    }
-  }, 900);
+    intro.classList.add('out');
+    var fadeOut=setInterval(function(){
+      introAud.volume=Math.max(introAud.volume-0.03,0);
+      if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
+    },60);
+    setTimeout(function(){
+      intro.style.display='none';
+      if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
+        setTimeout(function(){
+          document.getElementById('tuto-safari').classList.add('open');
+          localStorage.setItem('tuto-seen','1');
+        }, 1000);
+      }
+    }, 900);
+  }, 4000);
 }
 
 // Enter key sur l'input intro
