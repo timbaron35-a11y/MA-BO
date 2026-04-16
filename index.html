@@ -442,7 +442,54 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 var auth, db, gProv;
 var CU = null, sels = {}, showS = {};
 var wonAwards = [];
-var aud = new Audio(), playIdx = null, curS = 0;
+var playIdx = null, curS = 0;
+
+// ─── GESTIONNAIRE AUDIO UNIQUE ───────────────────────────────────────────────
+var AUDIO = {
+  _el: new Audio(),
+  _onEndCb: null,
+  play: function(url, onEnd){
+    var self = this;
+    // Arrêter introAud si en cours
+    if(typeof introAud !== 'undefined' && !introAud.paused){
+      introAud.pause();
+      introAud.currentTime = 0;
+    }
+    if(this._el.src === url && !this._el.paused){
+      this._el.pause();
+      return false; // était en lecture, on a pausé
+    }
+    this._el.pause();
+    this._el.src = url;
+    this._el.currentTime = 0;
+    this._onEndCb = onEnd || null;
+    var p = this._el.play();
+    if(p !== undefined) p.catch(function(){});
+    return true; // lecture lancée
+  },
+  pause: function(){
+    this._el.pause();
+  },
+  stop: function(){
+    this._el.pause();
+    this._el.src = '';
+    this._el.currentTime = 0;
+  },
+  get paused(){ return this._el.paused; },
+  get src(){ return this._el.src; },
+  get currentTime(){ return this._el.currentTime; },
+  get duration(){ return this._el.duration; }
+};
+AUDIO._el.addEventListener('ended', function(){
+  if(AUDIO._onEndCb) AUDIO._onEndCb();
+  playIdx = null;
+  var b = document.getElementById('mpb'); if(b) b.textContent = '▶';
+  document.querySelectorAll('.dz-prev').forEach(function(b){ b.textContent = '▶'; });
+});
+AUDIO._el.addEventListener('pause', function(){
+  var b = document.getElementById('mpb'); if(b) b.textContent = '▶';
+});
+var aud = AUDIO._el; // compat pour le code existant
 
 var SC = [
   {e:"🎬",t:"Ouverture",d:"Plan d'ouverture. Lumière naturelle, légèrement surexposée. On entre dans le cadre sans savoir encore de quoi parle ce film. Qu'est-ce qu'on voit en premier ?",c:"#1a0a2e"},
@@ -990,18 +1037,10 @@ function itunesSearch(q){
 
 function togPlay(){
   var sel=sels[curS];if(!sel||!sel.preview)return;
-  if(!introAud.paused){introAud.pause();}
-  if(aud.src!==sel.preview){aud.pause();aud.src=sel.preview;}
-  if(aud.paused){
-    var p=aud.play();
-    if(p!==undefined){
-      p.then(function(){playIdx=curS;anim();var b=document.getElementById('mpb');if(b)b.textContent='⏸';})
-      .catch(function(){});
-    } else {playIdx=curS;anim();}
-  } else {
-    aud.pause();
-  }
-  var b=document.getElementById('mpb');if(b)b.textContent=aud.paused?'▶':'⏸';
+  var playing=AUDIO.play(sel.preview);
+  var b=document.getElementById('mpb');
+  if(playing){playIdx=curS;anim();if(b)b.textContent='⏸';}
+  else{playIdx=null;if(b)b.textContent='▶';}
 }
 function anim(){
   var f=document.getElementById('tpf');if(!f)return;
@@ -1021,20 +1060,14 @@ aud.addEventListener('pause',function(){var b=document.getElementById('mpb');if(
 
 function prev30(name,artist,btn,previewUrl){
   if(!previewUrl){toast('Pas de preview.');return;}
-  if(!introAud.paused){introAud.pause();}
-  if(aud.src===previewUrl&&!aud.paused){aud.pause();btn.textContent='▶';return;}
   document.querySelectorAll('.dz-prev').forEach(function(b){b.textContent='▶';});
-  btn.textContent='⏸';
-  if(aud.src!==previewUrl){aud.pause();aud.src=previewUrl;}
-  var p=aud.play();
-  if(p!==undefined){p.catch(function(){btn.textContent='▶';});}
-  aud.onended=function(){btn.textContent='▶';};
-  aud.onpause=function(){if(btn)btn.textContent='▶';};
+  var playing = AUDIO.play(previewUrl, function(){btn.textContent='▶';});
+  btn.textContent = playing ? '⏸' : '▶';
 }
 function selTr(name,artist,cover,preview){
   sels[curS]={name:name,artist:artist,cover:cover,preview:preview};
   delete showS[curS];
-  if(playIdx!==null&&playIdx!==curS){aud.pause();aud.src='';playIdx=null;}
+  if(playIdx!==null&&playIdx!==curS){AUDIO.stop();playIdx=null;}
   saveS(curS);renderTZ();renderProg();toast('Musique enregistrée ✓');
 }
 
@@ -1242,8 +1275,8 @@ function openFriendProfile(uid,name){
     mc.innerHTML=header+rows;
   });
 }
-function previewFriend(url){if(aud.src===url&&!aud.paused){aud.pause();return;}aud.src=url;aud.play();}
-function closeFriendModal(){document.getElementById('friend-modal').style.display='none';aud.pause();}
+function previewFriend(url){AUDIO.play(url);}
+function closeFriendModal(){document.getElementById('friend-modal').style.display='none';AUDIO.pause();}
 
 function renderSum(){
   var filled=Object.keys(sels);
@@ -1263,7 +1296,7 @@ function renderSum(){
   });
   if(!dz.children.length)dz.innerHTML='<div style="font-size:12px;color:var(--faint);">Ajoute des musiques d\'abord.</div>';
 }
-function sumPlay(i){var sel=sels[i];if(!sel||!sel.preview)return;if(aud.src===sel.preview&&!aud.paused){aud.pause();return;}aud.src=sel.preview;aud.play();}
+function sumPlay(i){var sel=sels[i];if(!sel||!sel.preview)return;AUDIO.play(sel.preview);}
 
 function copyTxt(){
   var k=Object.keys(sels);if(!k.length){toast('Ajoute des musiques d\'abord !');return;}
