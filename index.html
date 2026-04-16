@@ -10,7 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--bg:#06060c;--text:#e8e4df;--muted:rgba(232,228,223,0.4);--faint:rgba(232,228,223,0.15);--accent:#e8ddd0;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Inter',system-ui,sans-serif;--border:rgba(255,255,255,0.07);--surf:rgba(255,255,255,0.03);}
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;max-width:100%;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;}
 #cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
 .z1{position:relative;z-index:1;}
@@ -49,16 +49,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 .swrap{height:calc(100vh - 53px);display:grid;grid-template-rows:1fr auto;position:relative;overflow:hidden;}
 .sglow{position:absolute;inset:0;pointer-events:none;transition:background 1.2s;}
-.sbody{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 3rem 1rem;text-align:center;}
+.sbody{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem 1rem;text-align:center;}
 .prog{position:absolute;top:0;left:0;right:0;display:flex;gap:2px;z-index:10;pointer-events:none;}
 .pip{height:1px;flex:1;background:rgba(232,228,223,0.1);transition:background .6s;}
 .pip.d{background:rgba(232,228,223,0.5);}
 .pip.c{background:var(--text);}
 .snum{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:1.5rem;}
 .sem{font-size:5rem;margin-bottom:1.25rem;display:block;filter:grayscale(0.1);}
-.sti{font-family:var(--serif);font-size:clamp(2.4rem,5.5vw,4rem);font-weight:300;font-style:italic;line-height:1.05;margin-bottom:1.25rem;max-width:700px;}
-.sde{font-size:15px;color:var(--muted);line-height:1.8;max-width:560px;margin-bottom:1.75rem;}
-.tz{width:100%;max-width:520px;background:rgba(6,6,12,0.75);border:1px solid var(--border);padding:1.25rem 1.5rem;backdrop-filter:blur(24px);}
+.sti{font-family:var(--serif);font-size:clamp(1.8rem,5.5vw,4rem);font-weight:300;font-style:italic;line-height:1.05;margin-bottom:1rem;max-width:700px;word-break:break-word;}
+.sde{font-size:14px;color:var(--muted);line-height:1.75;max-width:560px;margin-bottom:1.25rem;word-break:break-word;}
+.tz{width:100%;max-width:520px;background:rgba(6,6,12,0.75);border:1px solid var(--border);padding:1rem 1rem;backdrop-filter:blur(24px);overflow:hidden;}
 .tr{display:flex;align-items:center;gap:12px;}
 .tc{width:48px;height:48px;border-radius:8px;background:var(--surf);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
 .tm{flex:1;min-width:0;}
@@ -76,10 +76,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .si::placeholder{color:var(--faint);}
 .sbtn{padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surf);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);white-space:nowrap;}
 .rl{max-height:180px;overflow-y:auto;}
-.ri{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.ri{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;overflow:hidden;min-width:0;}
 .ri:last-child{border-bottom:none;}
 .rc{width:32px;height:32px;border-radius:4px;background:var(--surf);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
-.rn{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rn{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 .rart{font-size:11px;color:var(--muted);}
 .rac{display:flex;gap:5px;flex-shrink:0;}
 .rb{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
@@ -88,7 +88,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .aibtn{width:100%;padding:8px;border:1px solid rgba(200,169,110,0.12);border-radius:8px;background:transparent;color:rgba(200,169,110,0.45);font-size:12px;cursor:pointer;font-family:var(--sans);margin-top:8px;transition:all .15s;}
 .aibtn:hover{color:var(--accent);border-color:rgba(200,169,110,0.3);}
 .hint{font-size:12px;color:var(--faint);text-align:center;padding:8px 0;}
-.snav{display:flex;justify-content:space-between;align-items:center;padding:.875rem 2rem;position:relative;z-index:4;border-top:1px solid var(--border);background:rgba(6,6,12,0.5);}
+.snav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;position:relative;z-index:4;border-top:1px solid var(--border);background:rgba(6,6,12,0.5);}
 .snb{padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .2s;}
 .spp{border:1px solid var(--border);background:transparent;color:var(--muted);}
 .spp:hover{color:var(--text);}
@@ -114,7 +114,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .fpp{padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:11px;color:var(--muted);}
 .empty{text-align:center;padding:3rem 2rem;color:var(--muted);}
 
-.pav{width:64px;height:64px;border-radius:50%;background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;color:var(--accent);margin-bottom:1.5rem;}
+.pav{width:80px;height:80px;border-radius:50%;background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;color:var(--accent);margin-bottom:.75rem;overflow:hidden;cursor:pointer;position:relative;flex-shrink:0;}
+.pav img{width:100%;height:100%;object-fit:cover;}
+.pav-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:1.5rem;}
+.pav-hint{font-size:11px;color:var(--faint);margin-top:6px;cursor:pointer;}
+.fav img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .fl{font-size:11px;color:var(--muted);margin-bottom:5px;display:block;letter-spacing:.5px;text-transform:uppercase;}
 .ff{width:100%;background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--sans);outline:none;margin-bottom:1rem;transition:border .2s;}
 .ff:focus{border-color:rgba(200,169,110,0.3);}
@@ -163,11 +167,105 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 .ok{color:#7ecf9f;font-size:12px;margin-top:5px;}
 .ko{color:#e07070;font-size:12px;margin-top:5px;}
+
+
+/* INTRO */
+#intro{position:fixed;inset:0;z-index:200;background:#06060c;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;transition:opacity .8s;}
+#intro.out{opacity:0;pointer-events:none;}
+.intro-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:3.5rem;font-weight:300;font-style:italic;color:#e8ddd0;margin-bottom:.5rem;}
+.intro-sub{font-size:13px;color:rgba(232,228,223,0.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:2.5rem;}
+.intro-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 18px;color:#e8e4df;font-size:16px;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;text-align:center;outline:none;width:100%;max-width:320px;margin-bottom:1.5rem;}
+.intro-input::placeholder{color:rgba(232,228,223,0.3);}
+.intro-btn{padding:13px 32px;background:#e8ddd0;color:#06060c;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
+.intro-btn:hover{opacity:.85;}
+.intro-skip{font-size:11px;color:rgba(232,228,223,0.25);margin-top:1.25rem;cursor:pointer;text-decoration:underline;letter-spacing:1px;}
+
+/* TUTO SAFARI */
+#tuto-safari{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;align-items:flex-end;justify-content:center;padding-bottom:2rem;}
+#tuto-safari.open{display:flex;}
+.tuto-card{background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);border-radius:20px 20px 14px 14px;padding:1.75rem;width:100%;max-width:380px;text-align:center;}
+.tuto-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-style:italic;margin-bottom:.5rem;color:#e8ddd0;}
+.tuto-sub{font-size:13px;color:rgba(232,228,223,0.5);margin-bottom:1.5rem;}
+.tuto-steps{text-align:left;display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;}
+.tuto-step{display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(232,228,223,0.8);}
+.tuto-icon{width:36px;height:36px;border-radius:8px;background:rgba(200,169,110,0.15);border:1px solid rgba(200,169,110,0.25);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.tuto-close{width:100%;padding:11px;background:#e8ddd0;color:#06060c;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+
+/* ANIMATION CANNES */
+#cannes{display:none;position:fixed;inset:0;background:#06060c;z-index:250;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#cannes.open{display:flex;}
+#cannes-canvas{position:absolute;inset:0;pointer-events:none;}
+.cannes-body{position:relative;z-index:2;text-align:center;padding:2rem;}
+.cannes-palmier{font-size:5rem;margin-bottom:1rem;display:block;animation:palmPulse 1.5s ease-in-out infinite alternate;}
+@keyframes palmPulse{from{transform:scale(1);}to{transform:scale(1.08);}}
+.cannes-award{font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;color:rgba(200,169,110,0.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:.75rem;}
+.cannes-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:300;font-style:italic;color:#e8ddd0;margin-bottom:.5rem;line-height:1.1;}
+.cannes-sub{font-size:13px;color:rgba(232,228,223,0.4);margin-bottom:2.5rem;letter-spacing:1px;}
+.cannes-awards{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2rem;max-width:500px;}
+.cannes-badge{padding:8px 16px;border:1px solid rgba(200,169,110,0.3);border-radius:20px;font-size:12px;color:rgba(200,169,110,0.8);background:rgba(200,169,110,0.06);opacity:0;transform:translateY(10px);transition:all .4s;}
+.cannes-badge.in{opacity:1;transform:translateY(0);}
+.cannes-btn{padding:13px 36px;background:#e8ddd0;color:#06060c;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;opacity:0;transition:opacity .4s;}
+.cannes-btn.in{opacity:1;}
+
+/* BOUTON TUTO DANS NAV */
+.ntuto{width:28px;height:28px;border-radius:50%;background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.2);color:rgba(200,169,110,0.6);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;}
+
+/* CARTE PARTAGE */
+#card-canvas{display:none;}
+
+@media(max-width:480px){
+  .sem{font-size:3.5rem;}
+  .snum{margin-bottom:1rem;}
+  .snb{padding:9px 14px;font-size:12px;}
+  .nav{padding:.75rem 1rem;}
+  .pg{padding:1.5rem 1rem;}
+}
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="toast"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(200,169,110,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:380px;">
+    <div class="intro-logo">Ma BO</div>
+    <div class="intro-sub">La bande originale de ta vie</div>
+    <input class="intro-input" id="film-title" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
+    <button class="intro-btn" onclick="startApp()">Commencer →</button>
+    <div class="intro-skip" onclick="startApp()">passer</div>
+  </div>
+</div>
+
+<!-- TUTO SAFARI -->
+<div id="tuto-safari">
+  <div class="tuto-card">
+    <div class="tuto-title">Sur ton écran d'accueil</div>
+    <div class="tuto-sub">Installe Ma BO comme une vraie appli — sans passer par l'App Store.</div>
+    <div class="tuto-steps">
+      <div class="tuto-step"><div class="tuto-icon">⬆️</div><span>Clique sur <strong>Partager</strong> en bas de Safari</span></div>
+      <div class="tuto-step"><div class="tuto-icon">➕</div><span>Sélectionne <strong>"Sur l'écran d'accueil"</strong></span></div>
+      <div class="tuto-step"><div class="tuto-icon">✅</div><span>Clique <strong>Ajouter</strong> en haut à droite</span></div>
+    </div>
+    <button class="tuto-close" onclick="document.getElementById('tuto-safari').classList.remove('open')">Compris !</button>
+  </div>
+</div>
+
+<!-- ANIMATION CANNES -->
+<div id="cannes">
+  <canvas id="cannes-canvas"></canvas>
+  <div class="cannes-body">
+    <span class="cannes-palmier">🏆</span>
+    <div class="cannes-award">Palmarès · Ma BO</div>
+    <div class="cannes-title" id="cannes-film-title">Le film de ta vie</div>
+    <div class="cannes-sub">Bande originale sélectionnée</div>
+    <div class="cannes-awards" id="cannes-awards"></div>
+    <button class="cannes-btn" id="cannes-btn" onclick="closeCeremony()">Voir ma BO →</button>
+  </div>
+</div>
+
+<canvas id="card-canvas"></canvas>
 
 <div id="shmod">
   <img id="shimg" src="" alt=""/>
@@ -193,6 +291,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
     </div>
     <div id="tr" class="hid">
       <input class="fi" id="r-name" type="text" placeholder="Prénom"/>
+      <input class="fi" id="r-pseudo" type="text" placeholder="Pseudo (ex: @timdacostas)" maxlength="30"/>
       <input class="fi" id="r-email" type="email" placeholder="Email"/>
       <input class="fi" id="r-pw" type="password" placeholder="Mot de passe (6+ caractères)"/>
       <button class="btn" onclick="doReg()">Créer mon compte</button>
@@ -214,7 +313,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
       <button class="nl on" id="nl-home" onclick="go('home')">Scènes</button>
       <button class="nl" id="nl-friends" onclick="go('friends')">Amis</button>
       <button class="nl" id="nl-summary" onclick="go('summary')">Ma BO</button>
-      <div class="av" id="nav-av" onclick="go('profile')">?</div>
+      <div class="ntuto" onclick="document.getElementById('tuto-safari').classList.add('open')" title="Installer l'app">⊕</div><div class="av" id="nav-av" onclick="go('profile')">?</div>
     </div>
   </nav>
 
@@ -250,11 +349,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
       <div id="flist" style="margin-bottom:2rem;"></div>
 
       <div style="border-top:1px solid var(--border);padding-top:1.5rem;">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:.75rem;">Inviter un ami</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:.75rem;">Rechercher un ami</div>
         <div class="inv">
-          <input id="inv-email" type="email" placeholder="Email de ton ami(e)…"/>
-          <button class="bsm" onclick="sendInv()">Inviter</button>
+          <input id="inv-search" type="text" placeholder="Email, pseudo ou nom du film…" oninput="searchUsers(this.value)"/>
         </div>
+        <div id="inv-results" style="margin-top:.5rem;"></div>
         <div id="inv-msg"></div>
       </div>
     </div>
@@ -271,9 +370,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
     <div class="pg">
       <div class="stit">Mon profil</div>
       <div class="ssub">Modifie tes infos et tes scènes.</div>
-      <div class="pav" id="pav">?</div>
+      <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(this)"/>
+      <div class="pav-wrap">
+        <div class="pav" id="pav" onclick="document.getElementById('photo-input').click()">?</div>
+        <div class="pav-hint" onclick="document.getElementById('photo-input').click()">Changer la photo</div>
+      </div>
       <label class="fl">Prénom</label>
       <input class="ff" id="pname" type="text" placeholder="Ton prénom"/>
+      <label class="fl">Pseudo</label>
+      <input class="ff" id="ppseudo" type="text" placeholder="@tonpseudo" maxlength="30"/>
+      <label class="fl">Titre de ton film</label>
+      <input class="ff" id="pfilm" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
       <label class="fl">Email</label>
       <input class="ff" id="pemail" type="email" disabled style="opacity:.5;cursor:not-allowed;"/>
       <div>
@@ -298,7 +405,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
         <div class="expt">Partager ma BO</div>
         <div class="exps">Exporte pour les réseaux sociaux.</div>
         <div class="expb">
-          <button class="eb ebp" onclick="genImg()">Image Stories / Instagram</button>
+          <button class="eb" style="background:linear-gradient(135deg,#c8a96e,#e8ddd0);color:#06060c;border:none;font-weight:500;" onclick="launchCeremony()">🏆 Cérémonie</button>
+          <button class="eb ebp" onclick="genShareCard()">🎨 Carte à partager</button>
           <button class="eb" onclick="copyTxt()">Copier en texte</button>
         </div>
       </div>
@@ -657,7 +765,23 @@ function initFirebase(){
       document.getElementById('pav').textContent=ini;
       document.getElementById('pemail').value=user.email||'';
       document.getElementById('pname').value=user.displayName||'';
-      loadUD().then(function(){renderS();loadF();});
+      loadUD().then(function(){
+        renderS();loadF();
+        db.collection('users').doc(user.uid).get().then(function(snap){
+          if(snap.exists){
+            var d=snap.data();
+            if(d.photo){
+              window._currentPhoto=d.photo;
+              renderAvatar(document.getElementById('nav-av'),d.photo,user.displayName||'?');
+            }
+            if(d.pseudo)document.getElementById('ppseudo').value='@'+d.pseudo;
+            if(d.filmTitle){
+              document.getElementById('pfilm').value=d.filmTitle;
+              FILM_TITLE=d.filmTitle;
+            }
+          }
+        });
+      });
     } else {
       CU=null;
       document.getElementById('auth').style.display='flex';
@@ -691,14 +815,19 @@ function doLogin(){
 }
 function doReg(){
   if(!auth){document.getElementById('aerr').textContent='Connexion Firebase non prête, réessaie dans 2 secondes.';return;}
-  var n=document.getElementById('r-name').value.trim(),e=document.getElementById('r-email').value.trim(),p=document.getElementById('r-pw').value;
+  var n=document.getElementById('r-name').value.trim();
+  var ps=(document.getElementById('r-pseudo').value.trim()||'').replace(/^@/,'').toLowerCase();
+  var e=document.getElementById('r-email').value.trim(),p=document.getElementById('r-pw').value;
   if(!n){document.getElementById('aerr').textContent='Entre ton prénom.';return;}
   if(!e||!p){document.getElementById('aerr').textContent='Remplis tous les champs.';return;}
   document.getElementById('aerr').textContent='';
   setBtnLoading(true);
   auth.createUserWithEmailAndPassword(e,p).then(function(c){
     return c.user.updateProfile({displayName:n}).then(function(){
-      return db.collection('users').doc(c.user.uid).set({name:n,email:e,scenes:{},createdAt:Date.now()});
+      return db.collection('users').doc(c.user.uid).set({
+        name:n,pseudo:ps,email:e,filmTitle:'',photo:'',scenes:{},createdAt:Date.now(),
+        searchIndex:[n.toLowerCase(),ps,e.toLowerCase()]
+      });
     });
   }).catch(function(err){
     document.getElementById('aerr').textContent=ferr(err.code);
@@ -712,7 +841,10 @@ function doGoogle(){
   auth.signInWithPopup(gProv).then(function(c){
     var ref=db.collection('users').doc(c.user.uid);
     ref.get().then(function(snap){
-      if(!snap.exists) ref.set({name:c.user.displayName||'',email:c.user.email,scenes:{},createdAt:Date.now()});
+      if(!snap.exists){
+        var gn=(c.user.displayName||'').toLowerCase();
+        ref.set({name:c.user.displayName||'',pseudo:'',email:c.user.email,filmTitle:'',photo:'',scenes:{},createdAt:Date.now(),searchIndex:[gn,c.user.email.toLowerCase()]});
+      }
     });
   }).catch(function(err){
     document.getElementById('aerr').textContent=ferr(err.code);
@@ -879,15 +1011,47 @@ function go(name){
 }
 
 function savePro(){
-  if(!CU)return;var n=document.getElementById('pname').value.trim();
+  if(!CU)return;
+  var n=document.getElementById('pname').value.trim();
+  var ps=(document.getElementById('ppseudo').value.trim()||'').replace(/^@/,'').toLowerCase();
+  var ft=document.getElementById('pfilm').value.trim();
   if(!n){toast('Entre ton prénom.');return;}
+  var idx=[n.toLowerCase()];
+  if(ps)idx.push(ps);
+  idx.push(CU.email.toLowerCase());
+  if(ft)idx.push(ft.toLowerCase());
   CU.updateProfile({displayName:n}).then(function(){
-    return db.collection('users').doc(CU.uid).update({name:n});
+    return db.collection('users').doc(CU.uid).update({name:n,pseudo:ps,filmTitle:ft,searchIndex:idx});
   }).then(function(){
-    document.getElementById('nav-av').textContent=n[0].toUpperCase();
-    document.getElementById('pav').textContent=n[0].toUpperCase();
+    FILM_TITLE=ft||FILM_TITLE;
+    updateNavAvatar(n,window._currentPhoto||'');
     toast('Profil mis à jour ✓');
   });
+}
+function handlePhoto(input){
+  var file=input.files[0];if(!file)return;
+  if(file.size>500000){toast('Image trop lourde (max 500kb)');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var b64=e.target.result;
+    window._currentPhoto=b64;
+    renderAvatar(document.getElementById('pav'),b64,CU.displayName||'?');
+    db.collection('users').doc(CU.uid).update({photo:b64}).then(function(){toast('Photo mise à jour ✓');});
+  };
+  reader.readAsDataURL(file);
+}
+function updateNavAvatar(name,photo){
+  renderAvatar(document.getElementById('nav-av'),photo,name);
+  renderAvatar(document.getElementById('pav'),photo,name);
+}
+function renderAvatar(el,photo,name){
+  if(photo){
+    el.innerHTML='<img src="'+photo+'" alt=""/>';
+    el.style.padding='0';
+  } else {
+    el.innerHTML=(name||'?')[0].toUpperCase();
+    el.style.padding='';
+  }
 }
 function renderPS(){
   var el=document.getElementById('pscenes'),keys=Object.keys(sels);
@@ -967,8 +1131,10 @@ function loadF(){
         var oname=isFromMe?(f.toName||f.toEmail):(f.fromName||f.fromEmail);
         var oemail=isFromMe?f.toEmail:f.fromEmail;
         var c=document.createElement('div');c.className='fc';c.style.cursor='pointer';
-        c.innerHTML='<div class="fh"><div class="fav">'+((oname||'?')[0].toUpperCase())+'</div>'
-          +'<div style="flex:1"><div class="fn">'+eh(oname)+'</div><div class="fe">'+eh(oemail)+'</div></div>'
+        var fphoto=isFromMe?(f.toPhoto||''):(f.fromPhoto||'');
+        var favHtml=fphoto?'<div class="fav" style="padding:0;"><img src="'+fphoto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>':'<div class="fav">'+((oname||'?')[0].toUpperCase())+'</div>';
+        c.innerHTML='<div class="fh">'+favHtml+'<div style="flex:1">'
+          +'<div class="fn">'+eh(oname)+'</div><div class="fe">'+eh(oemail)+'</div></div>'
           +'<span class="fbadge">Ami ✓</span></div>'
           +'<div style="font-size:12px;color:var(--faint);margin-top:6px;">Voir sa BO →</div>';
         c.addEventListener('click',function(){openFriendProfile(ouid,oname);});
@@ -1086,6 +1252,228 @@ function eh(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 function es(s){return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function trunc(s,n){return s&&s.length>n?s.slice(0,n-1)+'...':s||'';}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2500);}
+
+// ─── INTRO ───────────────────────────────────────────────────────────────────
+var FILM_TITLE = '';
+var introAud = new Audio();
+
+(function(){
+  // Preview Bekar - Le film de ma vie via notre fonction Netlify
+  fetch('/.netlify/functions/deezer?q=Bekar+Le+film+de+ma+vie')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var t=data&&data.data&&data.data[0];
+      if(t&&t.preview){
+        introAud.src=t.preview;
+        introAud.volume=0.3;
+        introAud.loop=true;
+      }
+    }).catch(function(){});
+})();
+
+function startApp(){
+  FILM_TITLE = document.getElementById('film-title').value.trim() || 'Le film de ma vie';
+  // Fade out intro
+  var intro=document.getElementById('intro');
+  intro.classList.add('out');
+  introAud.play().catch(function(){});
+  setTimeout(function(){
+    intro.style.display='none';
+    introAud.pause();
+    // Afficher tuto Safari si iOS et première visite
+    if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
+      setTimeout(function(){
+        document.getElementById('tuto-safari').classList.add('open');
+        localStorage.setItem('tuto-seen','1');
+      }, 1500);
+    }
+  }, 900);
+}
+
+// Enter key sur l'input intro
+document.getElementById('film-title').addEventListener('keydown', function(e){
+  if(e.key==='Enter') startApp();
+});
+
+// ─── CÉRÉMONIE CANNES/CÉSAR ──────────────────────────────────────────────────
+function launchCeremony(){
+  var keys=Object.keys(sels);
+  if(keys.length<3){toast("Ajoute au moins 3 musiques avant !");return;}
+
+  var cannes=document.getElementById('cannes');
+  cannes.classList.add('open');
+
+  // Titre du film
+  document.getElementById('cannes-film-title').textContent=FILM_TITLE||'Le film de ma vie';
+
+  // Récompenses selon les scènes choisies
+  var awards=[
+    "🏆 Meilleure bande originale",
+    "🎬 Sélection officielle",
+    "🌴 Palme d'or de l'émotion",
+    "⭐ Grand prix du jury",
+    "🎭 Prix du scénario de vie",
+    "🎵 Prix de la révélation musicale",
+    "💫 César du meilleur souvenir",
+    "🎪 Prix du public"
+  ];
+  // Sélectionner aléatoirement selon le nb de scènes
+  var nb = Math.min(Math.floor(keys.length/3)+2, 5);
+  var picked = awards.sort(function(){return Math.random()-.5;}).slice(0,nb);
+
+  var awEl=document.getElementById('cannes-awards');
+  awEl.innerHTML='';
+  picked.forEach(function(a){
+    var b=document.createElement('div');
+    b.className='cannes-badge';
+    b.textContent=a;
+    awEl.appendChild(b);
+  });
+  document.getElementById('cannes-btn').classList.remove('in');
+
+  // Lancer les confettis canvas
+  startConfetti();
+
+  // Apparition progressive des badges
+  var badges=awEl.querySelectorAll('.cannes-badge');
+  badges.forEach(function(b,i){
+    setTimeout(function(){b.classList.add('in');},600+i*350);
+  });
+  setTimeout(function(){
+    document.getElementById('cannes-btn').classList.add('in');
+  }, 600+picked.length*350+400);
+}
+
+function closeCeremony(){
+  document.getElementById('cannes').classList.remove('open');
+  stopConfetti();
+  go('summary');
+}
+
+var confettiRaf=null;
+function startConfetti(){
+  var cv=document.getElementById('cannes-canvas');
+  var cx=cv.getContext('2d');
+  cv.width=innerWidth; cv.height=innerHeight;
+  var pieces=[];
+  var colors=['#c8a96e','#e8ddd0','#ffffff','#ffd700','#ff6b6b','#a8edea'];
+  for(var i=0;i<120;i++){
+    pieces.push({
+      x:Math.random()*cv.width,
+      y:Math.random()*cv.height-cv.height,
+      w:Math.random()*10+4,
+      h:Math.random()*6+3,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      rot:Math.random()*Math.PI*2,
+      drot:(Math.random()-.5)*.15,
+      vx:(Math.random()-.5)*2,
+      vy:Math.random()*3+1,
+      op:1
+    });
+  }
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    pieces.forEach(function(p){
+      cx.save();
+      cx.translate(p.x,p.y);
+      cx.rotate(p.rot);
+      cx.fillStyle=p.color;
+      cx.globalAlpha=p.op;
+      cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      cx.restore();
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.drot;
+      if(p.y>cv.height){p.y=-20;p.x=Math.random()*cv.width;}
+    });
+    confettiRaf=requestAnimationFrame(draw);
+  }
+  draw();
+}
+function stopConfetti(){
+  if(confettiRaf)cancelAnimationFrame(confettiRaf);
+  var cv=document.getElementById('cannes-canvas');
+  cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+}
+
+// ─── CARTE À PARTAGER ────────────────────────────────────────────────────────
+function genShareCard(){
+  var keys=Object.keys(sels);
+  if(!keys.length){toast("Ajoute des musiques d'abord !");return;}
+
+  var cv=document.getElementById('card-canvas');
+  var cx=cv.getContext('2d');
+  var W=1080,H=1080;
+  cv.width=W; cv.height=H;
+
+  // Fond dégradé doré
+  var bg=cx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#09090f');
+  bg.addColorStop(.5,'#131020');
+  bg.addColorStop(1,'#09090f');
+  cx.fillStyle=bg; cx.fillRect(0,0,W,H);
+
+  // Bordure intérieure dorée
+  cx.strokeStyle='rgba(200,169,110,0.3)';
+  cx.lineWidth=1;
+  cx.strokeRect(40,40,W-80,H-80);
+  cx.strokeStyle='rgba(200,169,110,0.1)';
+  cx.lineWidth=1;
+  cx.strokeRect(50,50,W-100,H-100);
+
+  // Haut : titre app
+  cx.font='italic 300 52px Georgia,serif';
+  cx.fillStyle='#e8ddd0'; cx.textAlign='center';
+  cx.fillText('Ma BO', W/2, 130);
+  cx.font='300 18px sans-serif';
+  cx.fillStyle='rgba(200,169,110,0.5)';
+  cx.fillText('LA BANDE ORIGINALE DE MA VIE', W/2, 165);
+
+  // Titre du film
+  cx.font='italic 400 '+(FILM_TITLE&&FILM_TITLE.length>20?'34':'42')+'px Georgia,serif';
+  cx.fillStyle='#c8a96e';
+  cx.fillText('"'+(FILM_TITLE||'Le film de ma vie')+'"', W/2, 230);
+
+  // Ligne séparatrice
+  cx.strokeStyle='rgba(200,169,110,0.25)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(120,265); cx.lineTo(W-120,265); cx.stroke();
+
+  // Scènes — max 8
+  var toShow=keys.slice(0,8);
+  var startY=310, rowH=85;
+  toShow.forEach(function(k,i){
+    var s=SC[parseInt(k)], tr=sels[k];
+    var y=startY+i*rowH;
+    var col=i%2===0?120:W/2+20;
+    var isRight=i%2!==0;
+
+    // Emoji
+    cx.font='32px serif'; cx.textAlign='left';
+    cx.fillText(s.e, col, y+28);
+
+    // Titre scène
+    cx.font='500 20px sans-serif'; cx.fillStyle='rgba(232,228,223,0.5)';
+    cx.fillText(trunc(s.t,22), col+44, y+14);
+
+    // Musique
+    cx.font='600 22px sans-serif'; cx.fillStyle='#e8e4df';
+    cx.fillText(trunc(tr.name,22), col+44, y+38);
+
+    // Artiste
+    cx.font='300 18px sans-serif'; cx.fillStyle='rgba(200,169,110,0.7)';
+    cx.fillText(trunc(tr.artist,22), col+44, y+58);
+  });
+
+  // Bas : signature
+  cx.strokeStyle='rgba(200,169,110,0.2)'; cx.lineWidth=1;
+  cx.beginPath(); cx.moveTo(120,H-100); cx.lineTo(W-120,H-100); cx.stroke();
+  cx.font='italic 300 24px Georgia,serif';
+  cx.fillStyle='rgba(200,169,110,0.4)'; cx.textAlign='center';
+  cx.fillText('ma-bo.netlify.app', W/2, H-60);
+
+  // Afficher
+  document.getElementById('shimg').src=cv.toDataURL('image/png');
+  document.getElementById('shmod').classList.add('open');
+}
+
 document.addEventListener('keydown',function(e){if(!CU||document.activeElement.tagName==='INPUT')return;if(e.key==='ArrowRight')nextS();if(e.key==='ArrowLeft')prevS();});
 </script>
 </body>
