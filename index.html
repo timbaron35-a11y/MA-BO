@@ -47,9 +47,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .view{display:none;flex:1;}
 .view.on{display:block;}
 
-.swrap{height:calc(100vh - 53px);display:grid;grid-template-rows:1fr auto;position:relative;overflow:hidden;}
+.swrap{height:calc(100vh - 53px);display:grid;grid-template-rows:1fr auto;position:relative;overflow:hidden;width:100%;}
 .sglow{position:absolute;inset:0;pointer-events:none;transition:background 1.2s;}
-.sbody{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem 1rem;text-align:center;}
+.sbody{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem 1rem;text-align:center;width:100%;overflow:hidden;}
 .prog{position:absolute;top:0;left:0;right:0;display:flex;gap:2px;z-index:10;pointer-events:none;}
 .pip{height:1px;flex:1;background:rgba(232,228,223,0.1);transition:background .6s;}
 .pip.d{background:rgba(232,228,223,0.5);}
@@ -58,8 +58,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .sem{font-size:5rem;margin-bottom:1.25rem;display:block;filter:grayscale(0.1);}
 .sti{font-family:var(--serif);font-size:clamp(1.8rem,5.5vw,4rem);font-weight:300;font-style:italic;line-height:1.05;margin-bottom:1rem;max-width:700px;word-break:break-word;}
 .sde{font-size:14px;color:var(--muted);line-height:1.75;max-width:560px;margin-bottom:1.25rem;word-break:break-word;}
-.tz{width:100%;max-width:520px;background:rgba(6,6,12,0.75);border:1px solid var(--border);padding:1rem 1rem;backdrop-filter:blur(24px);overflow:hidden;}
-.tr{display:flex;align-items:center;gap:12px;}
+.tz{width:100%;max-width:520px;min-width:0;background:rgba(6,6,12,0.75);border:1px solid var(--border);padding:1rem;backdrop-filter:blur(24px);overflow:hidden;box-sizing:border-box;}
+.tr{display:flex;align-items:center;gap:12px;min-width:0;overflow:hidden;}
 .tc{width:48px;height:48px;border-radius:8px;background:var(--surf);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
 .tm{flex:1;min-width:0;}
 .tn{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -422,6 +422,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 <script>
 var auth, db, gProv;
 var CU = null, sels = {}, showS = {};
+var wonAwards = [];
 var aud = new Audio(), playIdx = null, curS = 0;
 
 var SC = [
@@ -1295,53 +1296,106 @@ document.getElementById('film-title').addEventListener('keydown', function(e){
   if(e.key==='Enter') startApp();
 });
 
-// ─── CÉRÉMONIE CANNES/CÉSAR ──────────────────────────────────────────────────
+// ─── RÉCOMPENSES ─────────────────────────────────────────────────────────────
+var ALL_AWARDS = [
+  // LÉGENDAIRES (prob 0.05 chacune)
+  {t:"💎 Chef-d'œuvre absolu",r:"legendary",c:"#e8ddd0"},
+  {t:"👑 Palme d'or de la mémoire",r:"legendary",c:"#ffd700"},
+  {t:"🌌 Grand prix de l'univers intérieur",r:"legendary",c:"#a78bfa"},
+  {t:"🔮 Prix du génie incompris",r:"legendary",c:"#818cf8"},
+  {t:"🫀 Trophée de l'âme mise à nu",r:"legendary",c:"#f472b6"},
+  // ÉPIQUES (prob 0.12 chacune)
+  {t:"🌴 Palme d'or de l'émotion",r:"epic",c:"#c8a96e"},
+  {t:"🎭 César du scénario de vie",r:"epic",c:"#c8a96e"},
+  {t:"⭐ Grand prix du jury intérieur",r:"epic",c:"#c8a96e"},
+  {t:"🦁 Lion d'or du souvenir",r:"epic",c:"#f59e0b"},
+  {t:"🎪 Ours d'or de Berlin du vécu",r:"epic",c:"#f59e0b"},
+  {t:"🏛️ Prix du patrimoine émotionnel",r:"epic",c:"#c8a96e"},
+  // RARES (prob 0.25 chacune)
+  {t:"🎬 Sélection officielle",r:"rare",c:"#7c9cb8"},
+  {t:"🎵 Prix de la révélation musicale",r:"rare",c:"#7c9cb8"},
+  {t:"💫 César du meilleur souvenir",r:"rare",c:"#7c9cb8"},
+  {t:"🎸 Prix de la BO qui déchire",r:"rare",c:"#7c9cb8"},
+  {t:"🌊 Prix du plan le plus long",r:"rare",c:"#7c9cb8"},
+  {t:"🔥 Trophée de la scène culte",r:"rare",c:"#7c9cb8"},
+  {t:"🎙️ Prix du monologue intérieur",r:"rare",c:"#7c9cb8"},
+  {t:"🕯️ Prix de la lumière naturelle",r:"rare",c:"#7c9cb8"},
+  // COMMUNES (prob 0.5 chacune)
+  {t:"🏆 Meilleure bande originale",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎞️ Meilleur montage sonore",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎶 Prix du leitmotiv",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"📽️ Prix du premier plan",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎪 Prix du public",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🌟 Étoile montante",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎬 Clap de fin remarqué",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎤 Prix du sous-texte",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🌅 Prix du générique de fin",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"📖 Prix du récit authentique",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🎭 Mention spéciale du jury",r:"common",c:"rgba(232,228,223,0.6)"},
+  {t:"🌿 Prix du cinéma du réel",r:"common",c:"rgba(232,228,223,0.6)"},
+];
+
+var RARITY_WEIGHTS = {legendary:0.05, epic:0.15, rare:0.3, common:0.5};
+var wonAwards = [];
+
+function pickAwards(n){
+  var pool = ALL_AWARDS.slice();
+  var picked = [];
+  // Garantir au moins une epic ou legendary si assez de scènes
+  var keys = Object.keys(sels).length;
+  if(keys >= 6) {
+    var high = pool.filter(function(a){return a.r==='legendary'||a.r==='epic';});
+    var h = high[Math.floor(Math.random()*high.length)];
+    picked.push(h);
+    pool = pool.filter(function(a){return a.t!==h.t;});
+  }
+  while(picked.length < n && pool.length > 0){
+    // Tirage pondéré
+    var total = pool.reduce(function(s,a){return s+RARITY_WEIGHTS[a.r];},0);
+    var r = Math.random()*total, cum = 0, chosen = pool[pool.length-1];
+    for(var i=0;i<pool.length;i++){
+      cum += RARITY_WEIGHTS[pool[i].r];
+      if(r<=cum){chosen=pool[i];break;}
+    }
+    picked.push(chosen);
+    pool = pool.filter(function(a){return a.t!==chosen.t;});
+  }
+  return picked;
+}
+
 function launchCeremony(){
   var keys=Object.keys(sels);
   if(keys.length<3){toast("Ajoute au moins 3 musiques avant !");return;}
 
+  wonAwards = pickAwards(3);
+
   var cannes=document.getElementById('cannes');
   cannes.classList.add('open');
-
-  // Titre du film
   document.getElementById('cannes-film-title').textContent=FILM_TITLE||'Le film de ma vie';
-
-  // Récompenses selon les scènes choisies
-  var awards=[
-    "🏆 Meilleure bande originale",
-    "🎬 Sélection officielle",
-    "🌴 Palme d'or de l'émotion",
-    "⭐ Grand prix du jury",
-    "🎭 Prix du scénario de vie",
-    "🎵 Prix de la révélation musicale",
-    "💫 César du meilleur souvenir",
-    "🎪 Prix du public"
-  ];
-  // Sélectionner aléatoirement selon le nb de scènes
-  var nb = Math.min(Math.floor(keys.length/3)+2, 5);
-  var picked = awards.sort(function(){return Math.random()-.5;}).slice(0,nb);
 
   var awEl=document.getElementById('cannes-awards');
   awEl.innerHTML='';
-  picked.forEach(function(a){
+  wonAwards.forEach(function(a){
     var b=document.createElement('div');
     b.className='cannes-badge';
-    b.textContent=a;
+    b.style.borderColor=a.c;
+    b.style.color=a.c;
+    if(a.r==='legendary') b.style.boxShadow='0 0 12px '+a.c+'55';
+    b.textContent=a.t;
+    if(a.r==='legendary') b.setAttribute('data-rare','⬡ LÉGENDAIRE');
+    else if(a.r==='epic') b.setAttribute('data-rare','◈ ÉPIQUE');
     awEl.appendChild(b);
   });
   document.getElementById('cannes-btn').classList.remove('in');
-
-  // Lancer les confettis canvas
   startConfetti();
 
-  // Apparition progressive des badges
   var badges=awEl.querySelectorAll('.cannes-badge');
   badges.forEach(function(b,i){
-    setTimeout(function(){b.classList.add('in');},600+i*350);
+    setTimeout(function(){b.classList.add('in');},600+i*500);
   });
   setTimeout(function(){
     document.getElementById('cannes-btn').classList.add('in');
-  }, 600+picked.length*350+400);
+  }, 600+wonAwards.length*500+400);
 }
 
 function closeCeremony(){
@@ -1394,85 +1448,206 @@ function stopConfetti(){
   cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
 }
 
-// ─── CARTE À PARTAGER ────────────────────────────────────────────────────────
+// ─── CARTE STYLISÉE ──────────────────────────────────────────────────────────
 function genShareCard(){
   var keys=Object.keys(sels);
   if(!keys.length){toast("Ajoute des musiques d'abord !");return;}
 
   var cv=document.getElementById('card-canvas');
   var cx=cv.getContext('2d');
-  var W=1080,H=1080;
+  var W=840,H=1360;
   cv.width=W; cv.height=H;
 
-  // Fond dégradé doré
-  var bg=cx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#09090f');
-  bg.addColorStop(.5,'#131020');
-  bg.addColorStop(1,'#09090f');
-  cx.fillStyle=bg; cx.fillRect(0,0,W,H);
+  // ── Helpers ──
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function filmStrip(y,h){
+    cx.fillStyle='rgba(6,1,16,0.96)'; cx.fillRect(0,y,W,h);
+    cx.strokeStyle='rgba(200,169,110,0.2)'; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(0,y+h); cx.lineTo(W,y+h); cx.stroke();
+    for(var x=16;x<W;x+=52){
+      cx.fillStyle='rgba(2,1,6,1)';
+      cx.beginPath();
+      if(cx.roundRect) cx.roundRect(x,y+6,28,h-12,5);
+      else cx.rect(x,y+6,28,h-12);
+      cx.fill();
+      cx.strokeStyle='rgba(200,169,110,0.18)'; cx.lineWidth=0.8; cx.stroke();
+    }
+  }
+  function sepLine(y){
+    var g=cx.createLinearGradient(0,y,W,y);
+    g.addColorStop(0,'rgba(200,169,110,0)');
+    g.addColorStop(0.3,'rgba(200,169,110,0.5)');
+    g.addColorStop(0.7,'rgba(200,169,110,0.5)');
+    g.addColorStop(1,'rgba(200,169,110,0)');
+    cx.strokeStyle=g; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(0,y); cx.lineTo(W,y); cx.stroke();
+  }
 
-  // Bordure intérieure dorée
-  cx.strokeStyle='rgba(200,169,110,0.3)';
-  cx.lineWidth=1;
-  cx.strokeRect(40,40,W-80,H-80);
-  cx.strokeStyle='rgba(200,169,110,0.1)';
-  cx.lineWidth=1;
-  cx.strokeRect(50,50,W-100,H-100);
+  // ── FOND NUIT ──
+  var skyGrad=cx.createLinearGradient(0,0,0,H*0.37);
+  skyGrad.addColorStop(0,'#1a0a3e');
+  skyGrad.addColorStop(0.5,'#0a0320');
+  skyGrad.addColorStop(1,'#050208');
+  cx.fillStyle=skyGrad; cx.fillRect(0,0,W,H*0.37);
+  cx.fillStyle='#050208'; cx.fillRect(0,H*0.37,W,H);
 
-  // Haut : titre app
-  cx.font='italic 300 52px Georgia,serif';
-  cx.fillStyle='#e8ddd0'; cx.textAlign='center';
-  cx.fillText('Ma BO', W/2, 130);
-  cx.font='300 18px sans-serif';
-  cx.fillStyle='rgba(200,169,110,0.5)';
-  cx.fillText('LA BANDE ORIGINALE DE MA VIE', W/2, 165);
+  // Grain
+  for(var i=0;i<3000;i++){
+    cx.fillStyle='rgba(255,255,255,'+rnd(0,0.02)+')';
+    cx.fillRect(rnd(0,W),rnd(0,H*0.37),1,1);
+  }
 
-  // Titre du film
-  cx.font='italic 400 '+(FILM_TITLE&&FILM_TITLE.length>20?'34':'42')+'px Georgia,serif';
-  cx.fillStyle='#c8a96e';
-  cx.fillText('"'+(FILM_TITLE||'Le film de ma vie')+'"', W/2, 230);
-
-  // Ligne séparatrice
-  cx.strokeStyle='rgba(200,169,110,0.25)'; cx.lineWidth=1;
-  cx.beginPath(); cx.moveTo(120,265); cx.lineTo(W-120,265); cx.stroke();
-
-  // Scènes — max 8
-  var toShow=keys.slice(0,8);
-  var startY=310, rowH=85;
-  toShow.forEach(function(k,i){
-    var s=SC[parseInt(k)], tr=sels[k];
-    var y=startY+i*rowH;
-    var col=i%2===0?120:W/2+20;
-    var isRight=i%2!==0;
-
-    // Emoji
-    cx.font='32px serif'; cx.textAlign='left';
-    cx.fillText(s.e, col, y+28);
-
-    // Titre scène
-    cx.font='500 20px sans-serif'; cx.fillStyle='rgba(232,228,223,0.5)';
-    cx.fillText(trunc(s.t,22), col+44, y+14);
-
-    // Musique
-    cx.font='600 22px sans-serif'; cx.fillStyle='#e8e4df';
-    cx.fillText(trunc(tr.name,22), col+44, y+38);
-
-    // Artiste
-    cx.font='300 18px sans-serif'; cx.fillStyle='rgba(200,169,110,0.7)';
-    cx.fillText(trunc(tr.artist,22), col+44, y+58);
+  // Étoiles
+  var stars=[[63,35,2.2],[124,18,1.4],[198,42,1.8],[265,14,1.2],[320,38,2],[390,22,1.6],[445,10,1.4],[510,32,2],[568,16,1.6],[625,28,1.4],[700,12,1.8],[755,40,1.4],[800,20,1.6],[82,80,1.2],[155,68,1.6],[230,92,1.4],[310,74,1.8],[380,88,1.2],[460,72,1.6],[540,90,1.4],[610,64,1.8],[680,86,1.2],[745,70,1.6],[820,80,1.4],[40,120,1.2],[118,108,1.6],[196,128,1.4],[275,112,1.8],[350,130,1.2],[425,116,1.6],[502,132,1.4]];
+  stars.forEach(function(s){
+    cx.beginPath(); cx.arc(s[0],s[1],s[2],0,Math.PI*2);
+    cx.fillStyle='rgba(255,255,255,'+rnd(0.4,0.9)+')'; cx.fill();
   });
 
-  // Bas : signature
-  cx.strokeStyle='rgba(200,169,110,0.2)'; cx.lineWidth=1;
-  cx.beginPath(); cx.moveTo(120,H-100); cx.lineTo(W-120,H-100); cx.stroke();
-  cx.font='italic 300 24px Georgia,serif';
-  cx.fillStyle='rgba(200,169,110,0.4)'; cx.textAlign='center';
-  cx.fillText('ma-bo.netlify.app', W/2, H-60);
+  // Lune
+  var moonX=660, moonY=145;
+  var mh=cx.createRadialGradient(moonX,moonY,0,moonX,moonY,76);
+  mh.addColorStop(0,'rgba(200,169,110,0.22)'); mh.addColorStop(1,'rgba(200,169,110,0)');
+  cx.fillStyle=mh; cx.beginPath(); cx.arc(moonX,moonY,76,0,Math.PI*2); cx.fill();
+  var mg=cx.createRadialGradient(moonX,moonY,0,moonX,moonY,44);
+  mg.addColorStop(0,'#f5e6c8'); mg.addColorStop(0.6,'#e8c87a'); mg.addColorStop(1,'rgba(200,160,48,0)');
+  cx.fillStyle=mg; cx.beginPath(); cx.arc(moonX,moonY,44,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(212,160,64,0.25)'; cx.beginPath(); cx.arc(moonX-13,moonY-10,7,0,Math.PI*2); cx.fill();
+  cx.fillStyle='rgba(212,160,64,0.2)'; cx.beginPath(); cx.arc(moonX+10,moonY+14,4,0,Math.PI*2); cx.fill();
 
-  // Afficher
+  // Montagnes
+  cx.fillStyle='rgba(13,5,32,0.85)';
+  cx.beginPath(); cx.moveTo(0,H*0.34); cx.lineTo(130,H*0.2); cx.lineTo(270,H*0.34); cx.closePath(); cx.fill();
+  cx.fillStyle='rgba(16,8,40,0.75)';
+  cx.beginPath(); cx.moveTo(80,H*0.34); cx.lineTo(230,H*0.17); cx.lineTo(400,H*0.34); cx.closePath(); cx.fill();
+  cx.fillStyle='rgba(10,3,24,0.9)';
+  cx.beginPath(); cx.moveTo(350,H*0.34); cx.lineTo(530,H*0.21); cx.lineTo(W,H*0.34); cx.closePath(); cx.fill();
+  cx.fillStyle='rgba(13,5,32,0.8)';
+  cx.beginPath(); cx.moveTo(480,H*0.34); cx.lineTo(680,H*0.18); cx.lineTo(W,H*0.28); cx.lineTo(W,H*0.34); cx.closePath(); cx.fill();
+
+  // Immeubles
+  var blds=[[0,280,26,56],[7,264,18,72],[28,288,20,50],[50,272,16,66],[68,282,22,56],[92,268,18,70],[112,276,16,62],[584,270,20,68],[606,256,16,82],[624,272,22,56],[648,260,18,78],[668,274,18,64],[688,258,16,80],[706,270,22,68],[728,258,18,80],[748,272,14,66],[764,260,22,78],[788,270,16,68],[808,256,20,82],[830,268,10,70]];
+  blds.forEach(function(b){
+    cx.fillStyle='rgba(7,2,15,1)'; cx.fillRect(b[0],b[1],b[2],b[3]);
+  });
+  // Fenêtres
+  var wins=[[10,268],[10,278],[32,278],[54,276],[94,272],[94,284],[116,280],[590,262],[610,276],[628,268],[650,264],[672,278],[692,262],[710,274],[732,262],[750,276],[768,264],[790,274],[812,260]];
+  wins.forEach(function(w){
+    cx.fillStyle='rgba(200,169,110,'+rnd(0.3,0.65)+')';
+    cx.fillRect(w[0],w[1],5,5);
+  });
+
+  // Fondu bas paysage
+  var fg=cx.createLinearGradient(0,H*0.27,0,H*0.37);
+  fg.addColorStop(0,'rgba(5,2,8,0)'); fg.addColorStop(1,'rgba(5,2,8,1)');
+  cx.fillStyle=fg; cx.fillRect(0,H*0.27,W,H*0.1);
+
+  // ── PELLICULE HAUT ──
+  filmStrip(0,68);
+  cx.font='italic 300 28px Georgia,serif';
+  cx.fillStyle='rgba(200,169,110,0.6)'; cx.textAlign='center';
+  cx.fillText('Ma BO', W/2, 44);
+
+  // ── TITRE FILM ──
+  var ft=FILM_TITLE||'Le film de ma vie';
+  cx.font='italic 300 18px Georgia,serif';
+  cx.fillStyle='rgba(200,169,110,0.4)'; cx.textAlign='center';
+  cx.fillText('UNE VIE EN MUSIQUE', W/2, H*0.37+50);
+  var fSize=ft.length>22?64:ft.length>14?80:96;
+  // Titre sur 2 lignes si long
+  var words=ft.split(' ');
+  var mid=Math.ceil(words.length/2);
+  var l1=words.slice(0,mid).join(' '), l2=words.slice(mid).join(' ');
+  cx.font='italic 400 '+fSize+'px Georgia,serif';
+  cx.fillStyle='#f0e4c8'; cx.textAlign='center';
+  if(l2){
+    cx.fillText(l1, W/2, H*0.37+120);
+    cx.fillText(l2, W/2, H*0.37+120+fSize*1.1);
+  } else {
+    cx.fillText(ft, W/2, H*0.37+100);
+  }
+
+  var afterTitle = l2 ? H*0.37+140+fSize*1.2 : H*0.37+130;
+  sepLine(afterTitle);
+
+  // ── RÉCOMPENSES ──
+  var aY=afterTitle+20;
+  if(wonAwards&&wonAwards.length){
+    wonAwards.forEach(function(a,i){
+      var bx=W/2-260,bw=520,bh=52;
+      var ay=aY+i*64;
+      cx.fillStyle=a.r==='legendary'?'rgba(167,139,250,0.1)':a.r==='epic'?'rgba(200,169,110,0.1)':'rgba(60,60,80,0.08)';
+      cx.beginPath();
+      if(cx.roundRect) cx.roundRect(bx,ay,bw,bh,26); else cx.rect(bx,ay,bw,bh);
+      cx.fill();
+      cx.strokeStyle=a.c; cx.lineWidth=a.r==='legendary'?1.5:0.8;
+      cx.beginPath();
+      if(cx.roundRect) cx.roundRect(bx,ay,bw,bh,26); else cx.rect(bx,ay,bw,bh);
+      cx.stroke();
+      cx.font='500 18px sans-serif'; cx.fillStyle=a.c; cx.textAlign='center';
+      cx.fillText(a.t, W/2, ay+33);
+    });
+    aY+=wonAwards.length*64+16;
+  }
+  sepLine(aY+8);
+
+  // ── MUSIQUES ──
+  cx.font='300 13px sans-serif'; cx.fillStyle='rgba(200,169,110,0.4)'; cx.textAlign='center';
+  cx.fillText('BANDE ORIGINALE', W/2, aY+32);
+
+  var mY=aY+50, rowH=110;
+  var toShow=keys.slice(0,Math.min(8,keys.length));
+  toShow.forEach(function(k,i){
+    var s=SC[parseInt(k)], tr=sels[k];
+    var y=mY+i*rowH;
+    var even=i%2===0;
+    // Fond alterné
+    if(even){ cx.fillStyle='rgba(200,169,110,0.025)'; cx.fillRect(60,y,W-120,rowH-4); }
+    // Barre gauche
+    cx.fillStyle='rgba(200,169,110,'+(even?'0.55':'0.28')+')';
+    cx.fillRect(60,y+12,4,rowH-28);
+    // Scène label
+    cx.font='italic 400 15px Georgia,serif'; cx.textAlign='left'; cx.fillStyle='rgba(200,169,110,0.5)';
+    cx.fillText(trunc(s.t,30), 80, y+28);
+    // Titre musique
+    cx.font='500 24px sans-serif'; cx.fillStyle='#e8e4df';
+    cx.fillText(trunc(tr.name,32), 80, y+58);
+    // Artiste
+    cx.font='300 18px sans-serif'; cx.fillStyle='rgba(200,169,110,0.7)';
+    cx.fillText(trunc(tr.artist,32), 80, y+80);
+    // Séparateur léger
+    if(i<toShow.length-1){
+      cx.strokeStyle='rgba(200,169,110,0.1)'; cx.lineWidth=0.8;
+      cx.beginPath(); cx.moveTo(60,y+rowH-2); cx.lineTo(W-60,y+rowH-2); cx.stroke();
+    }
+  });
+
+  // ── SIGNATURE ──
+  var sigY=mY+toShow.length*rowH+20;
+  sepLine(sigY);
+  cx.font='italic 300 18px Georgia,serif'; cx.fillStyle='rgba(200,169,110,0.25)'; cx.textAlign='center';
+  cx.fillText('ma-bo.netlify.app', W/2, sigY+30);
+
+  // ── PELLICULE BAS ──
+  filmStrip(H-68,68);
+
+  // ── BORDURE DORÉE ──
+  var border=cx.createLinearGradient(0,0,W,H);
+  border.addColorStop(0,'#f5d78e'); border.addColorStop(0.25,'#c8a96e');
+  border.addColorStop(0.5,'#ede0c4'); border.addColorStop(0.75,'#c8a96e');
+  border.addColorStop(1,'#f5d78e');
+  cx.strokeStyle=border; cx.lineWidth=4;
+  if(cx.roundRect) cx.roundRect(2,2,W-4,H-4,24); else cx.rect(2,2,W-4,H-4);
+  cx.stroke();
+  // Coins
+  [[20,20],[W-20,20],[20,H-20],[W-20,H-20]].forEach(function(p){
+    cx.fillStyle='rgba(200,169,110,0.4)'; cx.beginPath(); cx.arc(p[0],p[1],7,0,Math.PI*2); cx.fill();
+  });
+
   document.getElementById('shimg').src=cv.toDataURL('image/png');
   document.getElementById('shmod').classList.add('open');
 }
+
 
 document.addEventListener('keydown',function(e){if(!CU||document.activeElement.tagName==='INPUT')return;if(e.key==='ArrowRight')nextS();if(e.key==='ArrowLeft')prevS();});
 </script>
