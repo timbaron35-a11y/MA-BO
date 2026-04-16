@@ -170,7 +170,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 
 /* INTRO */
-#intro{position:fixed;inset:0;z-index:200;background:#06060c;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;transition:opacity .8s;}
+#intro{position:fixed;inset:0;z-index:200;background:#06060c;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;opacity:1;transition:opacity .85s ease;}
 #intro.out{opacity:0;pointer-events:none;}
 .intro-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:3.5rem;font-weight:300;font-style:italic;color:#e8ddd0;margin-bottom:.5rem;}
 .intro-sub{font-size:13px;color:rgba(232,228,223,0.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:2.5rem;}
@@ -1380,33 +1380,38 @@ function startApp(){
   FILM_TITLE = document.getElementById('film-title').value.trim() || 'Le film de ma vie';
   var intro=document.getElementById('intro');
 
-  // Lancer la musique au clic (autoplay autorisé car triggered par user)
-  if(introAud.src && introAud.paused){
-    introAud.volume=0;
+  // Lancer la musique au clic
+  if(introAud.src){
+    introAud.volume=0.32;
     introAud.play().catch(function(){});
-    var vol=0;
-    var fi=setInterval(function(){
-      vol=Math.min(vol+0.05,0.32);
-      introAud.volume=vol;
-      if(vol>=0.32) clearInterval(fi);
-    },80);
   }
 
-  // Sortie immédiate avec fondu
-  intro.classList.add('out');
-  var fadeOut=setInterval(function(){
-    introAud.volume=Math.max(introAud.volume-0.04,0);
-    if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
-  },60);
+  // Laisser jouer 2 secondes, puis fade out audio + visuel en même temps
   setTimeout(function(){
-    intro.style.display='none';
-    if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
-      setTimeout(function(){
-        document.getElementById('tuto-safari').classList.add('open');
-        localStorage.setItem('tuto-seen','1');
-      }, 1000);
-    }
-  }, 900);
+    // Fade out visuel
+    intro.classList.add('out');
+
+    // Fade out audio
+    var fadeOut=setInterval(function(){
+      introAud.volume=Math.max(introAud.volume-0.025,0);
+      if(introAud.volume<=0){
+        clearInterval(fadeOut);
+        introAud.pause();
+        introAud.currentTime=0;
+      }
+    },40);
+
+    // Cacher l'intro après le fondu CSS (0.8s)
+    setTimeout(function(){
+      intro.style.display='none';
+      if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
+        setTimeout(function(){
+          document.getElementById('tuto-safari').classList.add('open');
+          localStorage.setItem('tuto-seen','1');
+        }, 800);
+      }
+    }, 850);
+  }, 2000);
 }
 
 // Enter key sur l'input intro
