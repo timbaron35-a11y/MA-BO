@@ -170,7 +170,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 
 /* INTRO */
-#intro{position:fixed;inset:0;z-index:200;background:#06060c;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;transition:opacity .8s;}
+#intro{position:fixed;inset:0;z-index:200;background:#06060c;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;transition:opacity .8s;}
 #intro.out{opacity:0;pointer-events:none;}
 .intro-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:3.5rem;font-weight:300;font-style:italic;color:#e8ddd0;margin-bottom:.5rem;}
 .intro-sub{font-size:13px;color:rgba(232,228,223,0.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:2.5rem;}
@@ -231,7 +231,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 <div id="toast"></div>
 
 <!-- INTRO -->
-<div id="intro">
+<!-- SPLASH : appuie pour commencer -->
+<div id="splash" style="position:fixed;inset:0;z-index:210;background:#06060c;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity .6s;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(200,169,110,0.05) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;">
+    <div class="intro-logo" style="margin-bottom:.5rem;">Ma BO</div>
+    <div class="intro-sub" style="margin-bottom:3rem;">La bande originale de ta vie</div>
+    <button onclick="launchIntro()" style="background:transparent;border:1px solid rgba(200,169,110,0.4);color:#c8a96e;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;font-style:italic;padding:14px 36px;border-radius:30px;cursor:pointer;letter-spacing:1px;transition:all .3s;">
+      ▶ &nbsp;Appuie pour commencer
+    </button>
+  </div>
+</div>
+
+<div id="intro" style="display:none;">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(200,169,110,0.06) 0%,transparent 70%);pointer-events:none;"></div>
   <div style="position:relative;z-index:1;width:100%;max-width:380px;">
     <div class="intro-logo">Ma BO</div>
@@ -239,7 +251,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
     <div class="intro-phrase" id="intro-phrase"></div>
     <div class="intro-form" id="intro-form">
       <input class="intro-input" id="film-title" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
-      <button class="intro-btn" onclick="startApp()" id="intro-start-btn">▶ Commencer</button>
+      <button class="intro-btn" onclick="startApp()" id="intro-start-btn">Commencer →</button>
       <div class="intro-skip" onclick="startApp()">passer</div>
     </div>
   </div>
@@ -979,19 +991,13 @@ function itunesSearch(q){
 function togPlay(){
   var sel=sels[curS];if(!sel||!sel.preview)return;
   if(!introAud.paused){introAud.pause();}
-  if(aud.src!==sel.preview){
-    aud.pause();
-    aud.src=sel.preview;
-    aud.load();
-  }
+  if(aud.src!==sel.preview){aud.pause();aud.src=sel.preview;}
   if(aud.paused){
     var p=aud.play();
     if(p!==undefined){
       p.then(function(){playIdx=curS;anim();var b=document.getElementById('mpb');if(b)b.textContent='⏸';})
       .catch(function(){});
-    } else {
-      playIdx=curS;anim();
-    }
+    } else {playIdx=curS;anim();}
   } else {
     aud.pause();
   }
@@ -1015,23 +1021,13 @@ aud.addEventListener('pause',function(){var b=document.getElementById('mpb');if(
 
 function prev30(name,artist,btn,previewUrl){
   if(!previewUrl){toast('Pas de preview.');return;}
-  // Stopper l'intro audio si en cours
   if(!introAud.paused){introAud.pause();}
-  // Toggle si même src
   if(aud.src===previewUrl&&!aud.paused){aud.pause();btn.textContent='▶';return;}
-  // Reset tous les boutons preview
   document.querySelectorAll('.dz-prev').forEach(function(b){b.textContent='▶';});
-  btn.textContent='…';
-  aud.pause();
-  aud.src=previewUrl;
-  aud.load();
-  var playPromise=aud.play();
-  if(playPromise!==undefined){
-    playPromise.then(function(){btn.textContent='⏸';})
-    .catch(function(){btn.textContent='▶';toast('Lecture impossible');});
-  } else {
-    btn.textContent='⏸';
-  }
+  btn.textContent='⏸';
+  if(aud.src!==previewUrl){aud.pause();aud.src=previewUrl;}
+  var p=aud.play();
+  if(p!==undefined){p.catch(function(){btn.textContent='▶';});}
   aud.onended=function(){btn.textContent='▶';};
   aud.onpause=function(){if(btn)btn.textContent='▶';};
 }
@@ -1315,7 +1311,7 @@ introAud.preload = 'auto';
 
 (function(){
   // Preview Bekar - Le film de ma vie via notre fonction Netlify
-  fetch('/.netlify/functions/deezer?q=Bekar+Le+film+de+ma+vie')
+  fetch('/.netlify/functions/deezer?q=Sofiane+Pamart+Invisible+Piano')
     .then(function(r){return r.json();})
     .then(function(data){
       var t=data&&data.data&&data.data[0];
@@ -1337,11 +1333,29 @@ var INTRO_PHRASES = [
 ];
 var _introStarted = false;
 
-(function launchIntroSequence(){
+function launchIntro(){
+  // Cacher le splash
+  var splash = document.getElementById('splash');
+  splash.style.opacity = '0';
+  setTimeout(function(){ splash.style.display = 'none'; }, 600);
+
+  // Afficher l'intro
+  var intro = document.getElementById('intro');
+  intro.style.display = 'flex';
+
+  // Lancer la musique — autorisé car déclenché par un vrai clic user
+  introAud.volume = 0;
+  introAud.play().catch(function(){});
+  var vol = 0;
+  var fi = setInterval(function(){
+    vol = Math.min(vol + 0.03, 0.32);
+    introAud.volume = vol;
+    if(vol >= 0.32) clearInterval(fi);
+  }, 100);
+
+  // Séquence de phrases
   var phrase = document.getElementById('intro-phrase');
   var form = document.getElementById('intro-form');
-  if(!phrase) return;
-
   var i = 0;
   function showNext(){
     if(i >= INTRO_PHRASES.length){
@@ -1354,11 +1368,11 @@ var _introStarted = false;
       phrase.textContent = INTRO_PHRASES[i];
       phrase.classList.add('vis');
       i++;
-      setTimeout(showNext, 2200);
+      setTimeout(showNext, 2400);
     }, 500);
   }
-  setTimeout(showNext, 800);
-})();
+  setTimeout(showNext, 600);
+}
 
 function startApp(){
   if(_introStarted) return;
@@ -1366,35 +1380,33 @@ function startApp(){
   FILM_TITLE = document.getElementById('film-title').value.trim() || 'Le film de ma vie';
   var intro=document.getElementById('intro');
 
-  // Lancer la musique si pas encore démarrée
-  if(introAud.paused && introAud.src){
+  // Lancer la musique au clic (autoplay autorisé car triggered par user)
+  if(introAud.src && introAud.paused){
     introAud.volume=0;
     introAud.play().catch(function(){});
     var vol=0;
     var fi=setInterval(function(){
-      vol=Math.min(vol+0.04,0.32);
+      vol=Math.min(vol+0.05,0.32);
       introAud.volume=vol;
       if(vol>=0.32) clearInterval(fi);
     },80);
   }
 
-  // Attendre 4 secondes puis fade out
+  // Sortie immédiate avec fondu
+  intro.classList.add('out');
+  var fadeOut=setInterval(function(){
+    introAud.volume=Math.max(introAud.volume-0.04,0);
+    if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
+  },60);
   setTimeout(function(){
-    intro.classList.add('out');
-    var fadeOut=setInterval(function(){
-      introAud.volume=Math.max(introAud.volume-0.03,0);
-      if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
-    },60);
-    setTimeout(function(){
-      intro.style.display='none';
-      if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
-        setTimeout(function(){
-          document.getElementById('tuto-safari').classList.add('open');
-          localStorage.setItem('tuto-seen','1');
-        }, 1000);
-      }
-    }, 900);
-  }, 4000);
+    intro.style.display='none';
+    if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
+      setTimeout(function(){
+        document.getElementById('tuto-safari').classList.add('open');
+        localStorage.setItem('tuto-seen','1');
+      }, 1000);
+    }
+  }, 900);
 }
 
 // Enter key sur l'input intro
