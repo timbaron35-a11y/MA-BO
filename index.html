@@ -156,9 +156,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .dza:hover{background:rgba(250,164,26,0.12);}
 
 #share-canvas{display:none;}
-#shmod{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#shmod{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:1rem;overflow-y:auto;}
 #shmod.open{display:flex;}
-#shmod img{max-width:85vw;max-height:65vh;border-radius:12px;}
+#shmod img{max-width:92vw;max-height:80vh;border-radius:12px;object-fit:contain;}
 .shbtns{display:flex;gap:10px;}
 .bdl{padding:10px 20px;background:var(--accent);color:#0d0b08;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
 .bcl{padding:10px 20px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);}
@@ -179,6 +179,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .intro-btn{padding:13px 32px;background:#e8ddd0;color:#06060c;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
 .intro-btn:hover{opacity:.85;}
 .intro-skip{font-size:11px;color:rgba(232,228,223,0.25);margin-top:1.25rem;cursor:pointer;text-decoration:underline;letter-spacing:1px;}
+.intro-phrase{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem;font-weight:300;font-style:italic;color:rgba(232,228,223,0);text-align:center;line-height:1.7;max-width:340px;margin-bottom:2rem;transition:color 1.2s ease,opacity 1.2s ease;opacity:0;min-height:3em;}
+.intro-phrase.vis{color:rgba(232,228,223,0.75);opacity:1;}
+.intro-form{opacity:0;transform:translateY(12px);transition:opacity .8s ease,transform .8s ease;}
+.intro-form.vis{opacity:1;transform:translateY(0);}
 
 /* TUTO SAFARI */
 #tuto-safari{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;align-items:flex-end;justify-content:center;padding-bottom:2rem;}
@@ -202,7 +206,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .cannes-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:300;font-style:italic;color:#e8ddd0;margin-bottom:.5rem;line-height:1.1;}
 .cannes-sub{font-size:13px;color:rgba(232,228,223,0.4);margin-bottom:2.5rem;letter-spacing:1px;}
 .cannes-awards{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2rem;max-width:500px;}
-.cannes-badge{padding:8px 16px;border:1px solid rgba(200,169,110,0.3);border-radius:20px;font-size:12px;color:rgba(200,169,110,0.8);background:rgba(200,169,110,0.06);opacity:0;transform:translateY(10px);transition:all .4s;}
+.cannes-badge{padding:10px 20px;border:1px solid rgba(200,169,110,0.3);border-radius:20px;font-size:13px;color:rgba(200,169,110,0.8);background:rgba(200,169,110,0.06);opacity:0;transform:translateY(10px);transition:all .4s;text-align:center;line-height:1.4;}
 .cannes-badge.in{opacity:1;transform:translateY(0);}
 .cannes-btn{padding:13px 36px;background:#e8ddd0;color:#06060c;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;opacity:0;transition:opacity .4s;}
 .cannes-btn.in{opacity:1;}
@@ -232,9 +236,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
   <div style="position:relative;z-index:1;width:100%;max-width:380px;">
     <div class="intro-logo">Ma BO</div>
     <div class="intro-sub">La bande originale de ta vie</div>
-    <input class="intro-input" id="film-title" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
-    <button class="intro-btn" onclick="startApp()">Commencer →</button>
-    <div class="intro-skip" onclick="startApp()">passer</div>
+    <div class="intro-phrase" id="intro-phrase"></div>
+    <div class="intro-form" id="intro-form">
+      <input class="intro-input" id="film-title" type="text" placeholder="Le titre de ton film…" maxlength="40"/>
+      <button class="intro-btn" onclick="startApp()">Commencer →</button>
+      <div class="intro-skip" onclick="startApp()">passer</div>
+    </div>
   </div>
 </div>
 
@@ -780,6 +787,9 @@ function initFirebase(){
               document.getElementById('pfilm').value=d.filmTitle;
               FILM_TITLE=d.filmTitle;
             }
+            if(d.awards&&d.awards.length){
+              wonAwards=d.awards;
+            }
           }
         });
       });
@@ -896,7 +906,22 @@ function renderTZ(){
   var z=document.getElementById('tz'),sel=sels[curS];
   var isp=playIdx===curS&&!aud.paused;
   if(sel){
-    z.innerHTML='<div class="tr"><div class="tc">'+SC[curS].e+'</div><div class="tm"><div class="tn">'+eh(sel.name)+'</div><div class="ta">'+eh(sel.artist)+'</div>'+(sel.preview?'<div class="tp"><div class="tpf" id="tpf"></div></div>':'')+'</div>'+(sel.preview?'<button class="pb" id="mpb" onclick="togPlay()">'+(isp?'⏸':'▶')+'</button>':'')+'</div><div style="text-align:right;margin-top:8px;"><span class="cl" onclick="openSrch()">↺ changer</span></div>';
+    // Pochette si dispo, sinon emoji scène
+    var coverEl=sel.cover
+      ?'<img src="'+eh(sel.cover)+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" crossorigin="anonymous"/>'
+      :SC[curS].e;
+    var nameShort=sel.name.length>22?sel.name.slice(0,21)+'…':sel.name;
+    var artistShort=sel.artist.length>26?sel.artist.slice(0,25)+'…':sel.artist;
+    z.innerHTML='<div class="tr">'
+      +'<div class="tc" style="overflow:hidden;flex-shrink:0;">'+coverEl+'</div>'
+      +'<div class="tm" style="min-width:0;overflow:hidden;">'
+      +'<div class="tn" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+eh(nameShort)+'</div>'
+      +'<div class="ta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+eh(artistShort)+'</div>'
+      +(sel.preview?'<div class="tp"><div class="tpf" id="tpf"></div></div>':'')
+      +'</div>'
+      +(sel.preview?'<button class="pb" id="mpb" onclick="togPlay()" style="flex-shrink:0;">'+(isp?'⏸':'▶')+'</button>':'')
+      +'</div>'
+      +'<div style="text-align:right;margin-top:8px;"><span class="cl" onclick="openSrch()">↺ changer</span></div>';
     if(isp)anim();
   } else if(showS[curS]){
     z.innerHTML='<div><input class="si" id="qi" style="width:100%;margin-bottom:8px;" type="text" placeholder="Titre, artiste..." oninput="liveSearch(this.value)"/></div><div id="rw"><div class="hint">Commence à écrire...</div></div>';
@@ -1272,21 +1297,89 @@ var introAud = new Audio();
     }).catch(function(){});
 })();
 
+// ── SÉQUENCE INTRO ──────────────────────────────────────────────────────────
+var INTRO_PHRASES = [
+  "Tu t'apprêtes à composer quelque chose d'unique.",
+  "La bande originale de ta vie.",
+  "Pas une playlist. Un film.",
+  "Chaque scène a sa musique. Chaque musique a son histoire.",
+  "Alors... comment s'appelle ton film ?"
+];
+var _introStarted = false;
+
+(function launchIntroSequence(){
+  var phrase = document.getElementById('intro-phrase');
+  var form = document.getElementById('intro-form');
+  if(!phrase) return;
+
+  // Démarrer la musique au premier contact (contourne l'autoplay mobile)
+  var _musicStarted = false;
+  function tryStartMusic(){
+    if(_musicStarted) return;
+    _musicStarted = true;
+    introAud.volume = 0;
+    introAud.play().catch(function(){});
+    var vol = 0;
+    var fi = setInterval(function(){
+      vol = Math.min(vol + 0.03, 0.32);
+      introAud.volume = vol;
+      if(vol >= 0.32) clearInterval(fi);
+    }, 100);
+  }
+  document.addEventListener('touchstart', tryStartMusic, {once:true});
+  document.addEventListener('click', tryStartMusic, {once:true});
+  // Sur desktop, tenter direct après 500ms (souvent autorisé)
+  setTimeout(function(){
+    if(!_musicStarted){
+      _musicStarted = true;
+      introAud.volume = 0;
+      introAud.play().catch(function(){});
+      var vol = 0;
+      var fi = setInterval(function(){
+        vol = Math.min(vol + 0.03, 0.32);
+        introAud.volume = vol;
+        if(vol >= 0.32) clearInterval(fi);
+      }, 100);
+    }
+  }, 500);
+
+  var i = 0;
+  function showNext(){
+    if(i >= INTRO_PHRASES.length){
+      phrase.classList.remove('vis');
+      setTimeout(function(){ form.classList.add('vis'); }, 600);
+      return;
+    }
+    phrase.classList.remove('vis');
+    setTimeout(function(){
+      phrase.textContent = INTRO_PHRASES[i];
+      phrase.classList.add('vis');
+      i++;
+      setTimeout(showNext, 2200);
+    }, 500);
+  }
+  setTimeout(showNext, 800);
+})();
+
 function startApp(){
+  if(_introStarted) return;
+  _introStarted = true;
   FILM_TITLE = document.getElementById('film-title').value.trim() || 'Le film de ma vie';
-  // Fade out intro
   var intro=document.getElementById('intro');
+
+  // Fade out musique puis disparition
   intro.classList.add('out');
-  introAud.play().catch(function(){});
+  var fadeOut=setInterval(function(){
+    introAud.volume=Math.max(introAud.volume-0.03,0);
+    if(introAud.volume<=0){ clearInterval(fadeOut); introAud.pause(); }
+  },60);
   setTimeout(function(){
     intro.style.display='none';
-    introAud.pause();
-    // Afficher tuto Safari si iOS et première visite
     if(/iphone|ipad/i.test(navigator.userAgent) && !localStorage.getItem('tuto-seen')){
       setTimeout(function(){
         document.getElementById('tuto-safari').classList.add('open');
         localStorage.setItem('tuto-seen','1');
-      }, 1500);
+      }, 1000);
     }
   }, 900);
 }
@@ -1367,9 +1460,33 @@ function launchCeremony(){
   var keys=Object.keys(sels);
   if(keys.length<3){toast("Ajoute au moins 3 musiques avant !");return;}
 
+  // Charger depuis Firebase si déjà tirées, sinon tirer et sauvegarder
+  if(wonAwards && wonAwards.length){
+    // Déjà tirées cette session, relancer la cérémonie directement
+    _showCeremony();
+    return;
+  }
+  if(CU){
+    db.collection('users').doc(CU.uid).get().then(function(snap){
+      if(snap.exists && snap.data().awards && snap.data().awards.length){
+        // Restaurer depuis Firebase
+        wonAwards = snap.data().awards;
+      } else {
+        // Premier tirage — sauvegarder
+        wonAwards = pickAwards(3);
+        db.collection('users').doc(CU.uid).update({awards: wonAwards}).catch(function(){
+          db.collection('users').doc(CU.uid).set({awards: wonAwards},{merge:true});
+        });
+      }
+      _showCeremony();
+    });
+    return;
+  }
   wonAwards = pickAwards(3);
+  _showCeremony();
+}
 
-  var cannes=document.getElementById('cannes');
+function _showCeremony(){
   cannes.classList.add('open');
   document.getElementById('cannes-film-title').textContent=FILM_TITLE||'Le film de ma vie';
 
@@ -1381,9 +1498,8 @@ function launchCeremony(){
     b.style.borderColor=a.c;
     b.style.color=a.c;
     if(a.r==='legendary') b.style.boxShadow='0 0 12px '+a.c+'55';
-    b.textContent=a.t;
-    if(a.r==='legendary') b.setAttribute('data-rare','⬡ LÉGENDAIRE');
-    else if(a.r==='epic') b.setAttribute('data-rare','◈ ÉPIQUE');
+    var rankLabel={'legendary':'✦ LÉGENDAIRE','epic':'◈ ÉPIQUE','rare':'◇ RARE','common':'· COMMUN'}[a.r]||'';
+    b.innerHTML='<span style="display:block;font-size:14px;letter-spacing:1.5px;opacity:0.5;margin-bottom:3px;">'+rankLabel+'</span>'+a.t;
     awEl.appendChild(b);
   });
   document.getElementById('cannes-btn').classList.remove('in');
@@ -1453,7 +1569,7 @@ function genShareCard(){
   var keys=Object.keys(sels);
   if(!keys.length){toast("Ajoute des musiques d'abord !");return;}
 
-  var cv=document.getElementById('card-canvas');
+  var cv=document.createElement('canvas');
   var cx=cv.getContext('2d');
   var W=840,H=1360;
   cv.width=W; cv.height=H;
@@ -1585,7 +1701,10 @@ function genShareCard(){
       if(cx.roundRect) cx.roundRect(bx,ay,bw,bh,26); else cx.rect(bx,ay,bw,bh);
       cx.stroke();
       cx.font='500 18px sans-serif'; cx.fillStyle=a.c; cx.textAlign='center';
-      cx.fillText(a.t, W/2, ay+33);
+      cx.fillText(a.t, W/2, ay+28);
+      var rlbl={'legendary':'✦ LÉGENDAIRE','epic':'◈ ÉPIQUE','rare':'◇ RARE','common':'· COMMUN'}[a.r]||'';
+      cx.font='300 12px sans-serif'; cx.globalAlpha=0.5;
+      cx.fillText(rlbl, W/2, ay+46); cx.globalAlpha=1;
     });
     aY+=wonAwards.length*64+16;
   }
